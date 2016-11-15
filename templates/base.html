@@ -2,6 +2,8 @@
 
 {% block title %}Flasky{% endblock %}
 
+
+
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
 	<div class="container">
@@ -23,6 +25,22 @@
 	</div>
 </div>
 {% endblock %}
+
+<!--收藏夹图标-->
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename = 'favicon.ico') }}"
+	  type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename = 'favicon.ico') }}"
+	  type="image/x-icon">
+{% endblock %}
+
+<!--引入moment.js 库-->
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+
 
 {% block content %}
 
