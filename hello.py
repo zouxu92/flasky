@@ -9,14 +9,13 @@ import os
 from flask_wtf import Form
 from wtforms import StringField, SubmitField
 from wtforms.validators import InputRequired, Required
-
 # 集成Python shell
 from flask_script import Shell,Manager
-
 # 迁移仓库
 from flask_migrate import Migrate, MigrateCommand
-
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+
 # 配置数据库
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -31,7 +30,8 @@ db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 # 初始化flask_moment --> 本地时间
 moment = Moment(app)
-
+# 初始化Flask-Mail
+mail = Mail(app)
 
 # 定义表单类
 class NameForm(Form):
@@ -99,6 +99,14 @@ def make_shell_context():
 manager.add_command("shell", Shell(make_context=make_shell_context))
 migrate = Migrate(app, db)
 manager.add_command('db', MigrateCommand)
+
+# 配置Flask-Mail 使用Gmail
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+
 
 if __name__ == '__main__':
 	# app.run(debug=True)
