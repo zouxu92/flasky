@@ -11,6 +11,9 @@ from flask_wtf import Form
 from wtforms import StringField, SubmitField
 from wtforms.validators import InputRequired, Required
 
+# 集成Python shell
+from flask_script import Shell
+
 from flask_sqlalchemy import SQLAlchemy
 # 配置数据库
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -99,6 +102,11 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
 	return render_template('500.html'), 500
+
+# 集成Python sell
+def make_shell_context():
+	return dict(app=app, db=db, User=User, Role=Role)
+# manager.add_command("shell", Shell(make_context=make_shell_context()))
 
 
 
