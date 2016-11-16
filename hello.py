@@ -5,14 +5,16 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
 import os
-
 # 表单
 from flask_wtf import Form
 from wtforms import StringField, SubmitField
 from wtforms.validators import InputRequired, Required
 
 # 集成Python shell
-from flask_script import Shell
+from flask_script import Shell,Manager
+
+# 迁移仓库
+from flask_migrate import Migrate, MigrateCommand
 
 from flask_sqlalchemy import SQLAlchemy
 # 配置数据库
@@ -24,11 +26,12 @@ app.config['SECRET_KEY'] = 'hard to guess string' # 保证安全不应该写入�
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
+manager = Manager(app)
 db = SQLAlchemy(app)
-
 bootstrap = Bootstrap(app)
 # 初始化flask_moment --> 本地时间
 moment = Moment(app)
+
 
 # 定义表单类
 class NameForm(Form):
@@ -59,9 +62,6 @@ class User(db.Model):
 
 
 
-
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
 	# name = None
@@ -79,17 +79,7 @@ def index():
 		return redirect(url_for('index'))
 	return render_template('index.html', form=form, name=session.get('name'),
 						   known = session.get('known', False),current_time=datetime.utcnow())
-	'''
-	if form.validate_on_submit():
-		old_name = session.get('name')
-		# 判断输入的名字不为空且不等于旧的session名字,(名字更改了),提示用户
-		if old_name is not None and old_name != form.name.data:
-			flash('Looks like you have changed you name!')
-		session['name'] = form.name.data
-		return redirect(url_for('index'))
-	return render_template('index.html', form=form, name=session.get('name'),
-						   current_time=datetime.utcnow())
-	'''
+
 @app.route('/user/<name>')
 def user(name):
 	return render_template('user.html', name=name)
@@ -106,9 +96,10 @@ def internal_server_error(e):
 # 集成Python sell
 def make_shell_context():
 	return dict(app=app, db=db, User=User, Role=Role)
-# manager.add_command("shell", Shell(make_context=make_shell_context()))
-
-
+manager.add_command("shell", Shell(make_context=make_shell_context))
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	# app.run(debug=True)
+	manager.run()
